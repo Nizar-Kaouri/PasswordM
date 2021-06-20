@@ -73,9 +73,9 @@ def add(titel: str, name: str, password_length: int):                           
     pyperclip.copy(password)                                                                                            # Das Password zum Clipboard kopieren
     file.write(encrypt(titel,shift) + " "*(25-len(encrypt(titel,shift))) + "|" +
                 encrypt(name,shift) + " "*(25-len(encrypt(name,shift)))+ "|" +
-               encrypt(password,shift) + " "*(4-len(encrypt(name,shift))) +"\n")             # Das Password verschlüsseln
-
-    print("Password generated and copied to Clipboard")                                                                 # in einem txt File mit Titel und Benutzername speichern
+               encrypt(password,shift) + " "*(4-len(encrypt(name,shift))) +"\n")                                        # Titel, Benutzername und Passwort verschlüsseln
+                                                                                                                        # und in einem txt File speichern
+    print("Password generated and copied to Clipboard")
     file.close()
 
 @app.command()
@@ -145,19 +145,19 @@ def clear():                                                                    
 
 
 @app.command()
-def change(x):
+def change(x):                                                                                                          # change Titel
     shift = 5
-    new_password = stdiomask.getpass("New Password: ")
+    new_password = stdiomask.getpass("New Password: ")                                                                  # Nach einem neuen Passwort fragen
     file = open("passwords.txt", 'r')
     zeilen = file.readlines()
     file.close()
     os.remove("passwords.txt")
     file = open("passwords.txt", 'a')
-    for rows in zeilen:
+    for rows in zeilen:                                                                                                 # Loop, um den Passwort-gehörenden titel zu finden
         column = rows.split('|')
         titel = decrypt(column[0], shift)
         if x.lower() in titel.lower():
-            rows = rows.replace(column[2]," "+encrypt(new_password,shift) + "\n")
+            rows = rows.replace(column[2]," "+encrypt(new_password,shift) + "\n")                                       # Altes Passwort ersetzen
             print("Done.")
         file.write(rows)
 
