@@ -60,7 +60,7 @@ def kopieren(x):                                                                
         titel = decrypt(column[0],shift)
         if x.lower() in titel.lower():
             print("Benutzername:" + decrypt(column[1],shift))                                                           # Password entschlüsselt und kopiert
-            pyperclip.copy(decrypt(column[2][column[2].index('')+1:],shift))
+            pyperclip.copy(decrypt(column[2][column[2].index(''):],shift))
             print("Password copied to clipboard.")
 
     file.close()
@@ -71,7 +71,10 @@ def add(titel: str, name: str, password_length: int):                           
     file = open("passwords.txt", 'a')
     password = generator(password_length)                                                                               # Ein Password mit der Generator-Funktion erstellen
     pyperclip.copy(password)                                                                                            # Das Password zum Clipboard kopieren
-    file.write(encrypt(titel,shift) + " | " + encrypt(name,shift) + " | " + encrypt(password,shift) + "\n")             # Das Password verschlüsseln
+    file.write(encrypt(titel,shift) + " "*(25-len(encrypt(titel,shift))) + "|" +
+                encrypt(name,shift) + " "*(25-len(encrypt(name,shift)))+ "|" +
+               encrypt(password,shift) + " "*(4-len(encrypt(name,shift))) +"\n")             # Das Password verschlüsseln
+
     print("Password generated and copied to Clipboard")                                                                 # in einem txt File mit Titel und Benutzername speichern
     file.close()
 
@@ -83,7 +86,9 @@ def display():                                                                  
         file = open("passwords.txt", 'r')
         for i in file:
             data = i.split("|")
-            print(decrypt(data[0],shift) + "|"+ decrypt(data[1],shift) + "|"+ decrypt(data[2],shift))                   # Format : TITEL | BENUTZERNAME | PASSWORD
+            print(decrypt(data[0],shift) + " "*(25-len(data[0])) + "|" +                                                # Format : TITEL | BENUTZERNAME | PASSWORD
+                  decrypt(data[1],shift) + " "*(25-len(data[1])) + "|" +
+                  decrypt(data[2],shift) + " "*(4-len(data[2])))
         file.close()
     else:
         print("Access Denied . Wrong Master Password. ")                                                                # Bei falscher Eingabe --> Ablehnungsnachricht
@@ -98,7 +103,7 @@ def delete(x):                                                                  
             lines = file.readlines()
             file.seek(0)
             for line in lines:
-                if encrypt(x,shift) not in line:
+                if encrypt(x.lower(),shift) not in line.lower():
                     file.write(line)
             file.truncate()
             print("Done.")
@@ -137,6 +142,28 @@ def clear():                                                                    
         print("All passwords cleared.")
     else:
         print("Canceled.")                                                                                              # Sonst abgesagt
+
+
+@app.command()
+def change(x):
+    shift = 5
+    new_password = stdiomask.getpass("New Password: ")
+    file = open("passwords.txt", 'r')
+    zeilen = file.readlines()
+    file.close()
+    os.remove("passwords.txt")
+    file = open("passwords.txt", 'a')
+    for rows in zeilen:
+        column = rows.split('|')
+        titel = decrypt(column[0], shift)
+        if x.lower() in titel.lower():
+            rows = rows.replace(column[2]," "+encrypt(new_password,shift) + "\n")
+            print("Done.")
+        file.write(rows)
+
+
+
+
 
 if __name__ == "__main__":
     app()
