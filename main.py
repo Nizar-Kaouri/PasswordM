@@ -71,53 +71,142 @@ def kopieren(x):                                                                
 
 @app.command()
 def add(titel: str, name: str, password_length: int):                                                                   # add + Titel + Benutzername + Länge des Passwortes
-    shift =  5
-    file = open("passwords.txt", 'a')
-    password = generator(password_length)                                                                               # Ein Password mit der Generator-Funktion erstellen
-    pyperclip.copy(password)                                                                                            # Das Password zum Clipboard kopieren
-    file.write(encrypt(titel,shift) + " "*(25-len(encrypt(titel,shift))) + "|" +
-                encrypt(name,shift) + " "*(25-len(encrypt(name,shift)))+ "|" +
-               encrypt(password,shift) + " "*(4-len(encrypt(name,shift))) +"\n")                                        # Titel, Benutzername und Passwort verschlüsseln
-                                                                                                                        # und in einem txt File speichern
-    print("Password generated and copied to Clipboard")
-    file.close()
+    if not os.path.isfile("timestamp.txt"):
+        timefile = open("timestamp.txt", 'w')
+        timefile.write("2021-06-11 18:42:16.058009")
+        timefile.close()
+    timefile = open("timestamp.txt", 'r')
+    timestampstr = timefile.readline()
+    timestamp = datetime.datetime.strptime(timestampstr, "%Y-%m-%d %H:%M:%S.%f")
+    timedelta = datetime.datetime.now() - timestamp
+    if timedelta > datetime.timedelta(minutes=1):
+        master_password_input = stdiomask.getpass("--Master Password: ")                                                # Der Benutzer wird nach einem Master-Password gefragt
+        if master_password_input == master_password:                                                                    # Bei richtiger Eingabe werden alle Passwörter
+            timefile = open("timestamp.txt", 'w')                                                                       # auf dem Bildschirm angezeigt
+            timefile.write(str(datetime.datetime.now()))
+            shift =  5
+            file = open("passwords.txt", 'a')
+            password = generator(password_length)                                                                       # Ein Password mit der Generator-Funktion erstellen
+            pyperclip.copy(password)                                                                                    # Das Password zum Clipboard kopieren
+            file.write(encrypt(titel,shift) + " "*(25-len(encrypt(titel,shift))) + "|" +
+                                                   encrypt(name,shift) + " "*(25-len(encrypt(name,shift)))+ "|" +
+                                                   encrypt(password,shift) + " "*(4-len(encrypt(name,shift))) +"\n")    # Titel, Benutzername und Passwort verschlüsseln
+            print("Password generated and copied to Clipboard")                                                         # und in einem txt File speichern
+            file.close()
+        else:
+            print("Access Denied. Wrong Master Password.")
+    else:
+        timefile = open("timestamp.txt", 'w')
+        timefile.write(str(datetime.datetime.now()))
+        shift = 5
+        file = open("passwords.txt", 'a')
+        password = generator(password_length)
+        pyperclip.copy(password)
+        file.write(encrypt(titel, shift) + " " * (25 - len(encrypt(titel, shift))) + "|" +
+                   encrypt(name, shift) + " " * (25 - len(encrypt(name, shift))) + "|" +
+                   encrypt(password, shift) + " " * (
+                               4 - len(encrypt(name, shift))) + "\n")
+        print("Password generated and copied to Clipboard")
+        file.close()
+
+
 
 @app.command()
 def display():                                                                                                          # display
-    shift = 5
-    master_password_input = stdiomask.getpass("--Master Password: ")                                                    # Der Benutzer wird nach einem Master-Password gefragt
-    if master_password_input == master_password:                                                                        # Bei richtiger Eingabe werden alle Passwörter auf dem Bildschirm angezeigt
+    if not os.path.isfile("timestamp.txt"):
+        timefile = open("timestamp.txt", 'w')
+        timefile.write("2021-06-11 18:42:16.058009")
+        timefile.close()
+    timefile = open("timestamp.txt", 'r')
+    timestampstr = timefile.readline()
+    timestamp = datetime.datetime.strptime(timestampstr, "%Y-%m-%d %H:%M:%S.%f")
+    timedelta = datetime.datetime.now() - timestamp
+    if timedelta > datetime.timedelta(minutes=1):
+        shift = 5
+        master_password_input = stdiomask.getpass("--Master Password: ")                                                # Der Benutzer wird nach einem Master-Password gefragt
+        if master_password_input == master_password:
+            timefile = open("timestamp.txt", 'w')
+            timefile.write(str(datetime.datetime.now()))
+            file = open("passwords.txt", 'r')
+            for i in file:
+                data = i.split("|")
+                print(decrypt(data[0],shift) + " "*(25-len(data[0])) + "|" +                                            # Format : TITEL | BENUTZERNAME | PASSWORD
+                decrypt(data[1],shift) + " "*(25-len(data[1])) + "|" +
+                decrypt(data[2],shift) + " "*(4-len(data[2])))
+            file.close()
+        else:
+            print("Access Denied . Wrong Master Password. ")                                                            # Bei falscher Eingabe --> Ablehnungsnachricht
+    else:
+        timefile = open("timestamp.txt", 'w')
+        timefile.write(str(datetime.datetime.now()))
+        shift = 5
         file = open("passwords.txt", 'r')
         for i in file:
             data = i.split("|")
-            print(decrypt(data[0],shift) + " "*(25-len(data[0])) + "|" +                                                # Format : TITEL | BENUTZERNAME | PASSWORD
-                  decrypt(data[1],shift) + " "*(25-len(data[1])) + "|" +
-                  decrypt(data[2],shift) + " "*(4-len(data[2])))
+            print(decrypt(data[0], shift) + " " * (25 - len(data[0])) + "|" +
+                  decrypt(data[1], shift) + " " * (25 - len(data[1])) + "|" +
+                  decrypt(data[2], shift) + " " * (4 - len(data[2])))
         file.close()
-    else:
-        print("Access Denied . Wrong Master Password. ")                                                                # Bei falscher Eingabe --> Ablehnungsnachricht
+
 
 @app.command()
 def delete(x):                                                                                                          # delete + TITEL
-    shift = 5
-    found = False
-    with open("passwords.txt", "r+") as file:
-        print("Press Y for Yes or else for No.")                                                                        # Nach einer Bestätigung fragen
-        choice = input("Do you really want to delete: " + str(x) +"\n")
-        if choice == "y":                                                                                               # Wenn Ja wird die Zeile, die den Titel enthält, gelöscht
-            lines = file.readlines()
-            file.seek(0)
-            for line in lines:
-                if encrypt(x.lower(),shift) not in line.lower():
-                    file.write(line)
+    if not os.path.isfile("timestamp.txt"):
+        timefile = open("timestamp.txt", 'w')
+        timefile.write("2021-06-11 18:42:16.058009")
+        timefile.close()
+    timefile = open("timestamp.txt", 'r')
+    timestampstr = timefile.readline()
+    timestamp = datetime.datetime.strptime(timestampstr, "%Y-%m-%d %H:%M:%S.%f")
+    timedelta = datetime.datetime.now() - timestamp
+    if timedelta > datetime.timedelta(minutes=1):
+        master_password_input = stdiomask.getpass("--Master Password: ")                                                # Der Benutzer wird nach einem Master-Password gefragt
+        if master_password_input == master_password:
+            timefile = open("timestamp.txt", 'w')
+            timefile.write(str(datetime.datetime.now()))
+            shift = 5
+            found = False
+            with open("passwords.txt", "r+") as file:
+                print("Press Y for Yes or else for No.")                                                                # Nach einer Bestätigung fragen
+                choice = input("Do you really want to delete: " + str(x) +"\n")
+                if choice == "y":                                                                                       # Wenn Ja wird die Zeile, die den Titel enthält, gelöscht
+                    lines = file.readlines()
+                    file.seek(0)
+                    for line in lines:
+                        if encrypt(x.lower(),shift) not in line.lower():
+                            file.write(line)
+                        else:
+                            found = True
+                            print("Done.")
+                    file.truncate()
+                    if found == False:                                                                                  # Wenn Titel nicht gefunden ist --> abgesagt.
+                        print("Title not found.")
                 else:
-                    found = True
-                    print("Done.")
-            file.truncate()
-            if found == False:                                                                                          # Wenn Titel nicht gefunden ist --> abgesagt.
-                print("Title not found.")
+                    print("Cancelled.")                                                                                 # Wenn nicht --> abgesagt
         else:
-            print("Cancelled.")                                                                                         # Wenn nicht --> abgesagt
+            print("Access denied. Wrong Master Password.")
+    else:
+        timefile = open("timestamp.txt", 'w')
+        timefile.write(str(datetime.datetime.now()))
+        shift = 5
+        found = False
+        with open("passwords.txt", "r+") as file:
+            print("Press Y for Yes or else for No.")
+            choice = input("Do you really want to delete: " + str(x) + "\n")
+            if choice == "y":
+                lines = file.readlines()
+                file.seek(0)
+                for line in lines:
+                    if encrypt(x.lower(), shift) not in line.lower():
+                        file.write(line)
+                    else:
+                        found = True
+                        print("Done.")
+                file.truncate()
+                if found == False:
+                    print("Title not found.")
+            else:
+                print("Cancelled.")
 
 @app.command()
 def copy(x):                                                                                                            # copy + TITEL
@@ -136,7 +225,7 @@ def copy(x):                                                                    
             timefile.write(str(datetime.datetime.now()))                                                                # Neues NOW-Timestamp ertstellen
             kopieren(x)                                                                                                 # Die Kopieren-Funktion laufen lassen
         else:
-            print("Access denied.")
+            print("Access denied. Wrong Master Password.")
     else:
         timefile = open("timestamp1.txt", 'w')                                                                          # Wenn die Differenz kleiner als die erlaubte Periode ist
         timefile.write(str(datetime.datetime.now()))                                                                    # Neues NOW-Timestamp ertstellen
@@ -144,35 +233,75 @@ def copy(x):                                                                    
 
 @app.command()
 def clear():                                                                                                            # clear
-    print("Press Y for Yes or else for No.")                                                                            # Nach einer Bestätigung fragen
-    choice = input("Do you really want to clear all your passwords ? \n ")
-    if choice == "y":                                                                                                   # Wenn Ja, das txt File löschen
-        os.remove("passwords.txt")
-        print("All passwords cleared.")
+    master_password_input = stdiomask.getpass("--Master Password: ")
+    if master_password == master_password_input:
+        print("Press Y for Yes or else for No.")                                                                        # Nach einer Bestätigung fragen
+        choice = input("Do you really want to clear all your passwords ? \n ")
+        if choice == "y":                                                                                               # Wenn Ja, das txt File löschen
+            os.remove("passwords.txt")
+            print("All passwords cleared.")
+        else:
+            print("Canceled.")                                                                                          # Sonst abgesagt
     else:
-        print("Canceled.")                                                                                              # Sonst abgesagt
+        print("Access denied. Wrong Master Password.")
 
 
 @app.command()
 def change(x):                                                                                                          # change Titel
-    shift = 5
-    new_password = stdiomask.getpass("--New Password: ")                                                                # Nach einem neuen Passwort fragen
-    file = open("passwords.txt", 'r')
-    zeilen = file.readlines()
-    file.close()
-    os.remove("passwords.txt")
-    file = open("passwords.txt", 'a')
-    for rows in zeilen:                                                                                                 # Loop, um den Passwort-gehörenden titel zu finden
-        column = rows.split('|')
-        titel = decrypt(column[0], shift)
-        if x.lower() in titel.lower():
-            rows = rows.replace(column[2]," "+encrypt(new_password,shift) + "\n")                                       # Altes Passwort ersetzen
-            print("Done.")
-        file.write(rows)
-
+    if not os.path.isfile("timestamp.txt"):
+        timefile = open("timestamp.txt", 'w')
+        timefile.write("2021-06-11 18:42:16.058009")
+        timefile.close()
+    timefile = open("timestamp.txt", 'r')
+    timestampstr = timefile.readline()
+    timestamp = datetime.datetime.strptime(timestampstr, "%Y-%m-%d %H:%M:%S.%f")
+    timedelta = datetime.datetime.now() - timestamp
+    if timedelta > datetime.timedelta(minutes=1):
+        master_password_input = stdiomask.getpass("--Master Password: ")
+        if master_password == master_password_input:                                                                    # Der Benutzer wird nach einem Master-Password gefragt
+            timefile = open("timestamp.txt", 'w')
+            timefile.write(str(datetime.datetime.now()))
+            shift = 5
+            new_password = stdiomask.getpass("--New Password: ")                                                        # Nach einem neuen Passwort fragen
+            file = open("passwords.txt", 'r')
+            zeilen = file.readlines()
+            file.close()
+            os.remove("passwords.txt")
+            file = open("passwords.txt", 'a')
+            for rows in zeilen:                                                                                         # Loop, um den Passwort-gehörenden titel zu finden
+                column = rows.split('|')
+                titel = decrypt(column[0], shift)
+                if x.lower() in titel.lower():
+                    rows = rows.replace(column[2]," "+encrypt(new_password,shift) + "\n")                               # Altes Passwort ersetzen
+                    print("Done.")
+                file.write(rows)
+        else:
+            print("Access denied. Wrong Master Password.")
+    else:
+        timefile = open("timestamp.txt", 'w')
+        timefile.write(str(datetime.datetime.now()))
+        timefile = open("timestamp.txt", 'w')
+        timefile.write(str(datetime.datetime.now()))
+        shift = 5
+        new_password = stdiomask.getpass("--New Password: ")
+        file = open("passwords.txt", 'r')
+        zeilen = file.readlines()
+        file.close()
+        os.remove("passwords.txt")
+        file = open("passwords.txt", 'a')
+        for rows in zeilen:
+            column = rows.split('|')
+            titel = decrypt(column[0], shift)
+            if x.lower() in titel.lower():
+                rows = rows.replace(column[2], " " + encrypt(new_password, shift) + "\n")
+                print("Done.")
+            file.write(rows)
 
 
 
 
 if __name__ == "__main__":
     app()
+
+
+
