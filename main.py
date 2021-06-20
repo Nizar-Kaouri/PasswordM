@@ -85,7 +85,7 @@ def add(titel: str, name: str, password_length: int):                           
 @app.command()
 def display():                                                                                                          # display
     shift = 5
-    master_password_input = stdiomask.getpass()                                                                         # Der Benutzer wird nach einem Master-Password gefragt
+    master_password_input = stdiomask.getpass("--Master Password: ")                                                    # Der Benutzer wird nach einem Master-Password gefragt
     if master_password_input == master_password:                                                                        # Bei richtiger Eingabe werden alle Passwörter auf dem Bildschirm angezeigt
         file = open("passwords.txt", 'r')
         for i in file:
@@ -130,7 +130,7 @@ def copy(x):                                                                    
     timestamp = datetime.datetime.strptime(timestampstr,"%Y-%m-%d %H:%M:%S.%f")                                         # Anfangs-Timestamp erstellt und gespeichert
     timedelta = datetime.datetime.now() - timestamp                                                                     # Differenz zwischen Anfangs-Timestamp und NOW-Timestamp
     if timedelta > datetime.timedelta(minutes=1):                                                                       # Wenn die Differenz größer als die erlaubte Periode ist,
-        master_password_input = stdiomask.getpass()                                                                     # wird es nach einem Master-Password gefragt
+        master_password_input = stdiomask.getpass("--Master Password: ")                                                # wird es nach einem Master-Password gefragt
         if master_password == master_password_input:
             timefile = open("timestamp.txt", 'w')
             timefile.write(str(datetime.datetime.now()))                                                                # Neues NOW-Timestamp ertstellen
@@ -156,7 +156,7 @@ def clear():                                                                    
 @app.command()
 def change(x):                                                                                                          # change Titel
     shift = 5
-    new_password = stdiomask.getpass("New Password: ")                                                                  # Nach einem neuen Passwort fragen
+    new_password = stdiomask.getpass("--New Password: ")                                                                # Nach einem neuen Passwort fragen
     file = open("passwords.txt", 'r')
     zeilen = file.readlines()
     file.close()
