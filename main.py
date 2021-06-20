@@ -54,6 +54,7 @@ def generator(password_length):                                                 
 def kopieren(x):                                                                                                        # Funktion, um ein Password von einem txt File zu kopieren,
     shift = 5                                                                                                           # dadurch kann man den Benutzernamen zeigen lassen/ Password kopieren.
     file = open("passwords.txt", 'r')
+    found = False
     zeilen = file.readlines()
     for rows in zeilen:                                                                                                 # Loop, um den Titel und das entsprechende Password zu finden
         column = rows.split('|')
@@ -62,6 +63,9 @@ def kopieren(x):                                                                
             print("Benutzername:" + decrypt(column[1],shift))                                                           # Password entschlüsselt und kopiert
             pyperclip.copy(decrypt(column[2][column[2].index(''):],shift))
             print("Password copied to clipboard.")
+            found = True
+    if found == False:
+        print("Title not found.")                                                                                       # Wenn Titel nicht gefunden ist --> abgesagt
 
     file.close()
 
@@ -96,6 +100,7 @@ def display():                                                                  
 @app.command()
 def delete(x):                                                                                                          # delete + TITEL
     shift = 5
+    found = False
     with open("passwords.txt", "r+") as file:
         print("Press Y for Yes or else for No.")                                                                        # Nach einer Bestätigung fragen
         choice = input("Do you really want to delete: " + str(x) +"\n")
@@ -105,10 +110,14 @@ def delete(x):                                                                  
             for line in lines:
                 if encrypt(x.lower(),shift) not in line.lower():
                     file.write(line)
+                else:
+                    found = True
+                    print("Done.")
             file.truncate()
-            print("Done.")
+            if found == False:                                                                                          # Wenn Titel nicht gefunden ist --> abgesagt.
+                print("Title not found.")
         else:
-            print("Cancelled.")                                                                                         # Wenn nicht, abgesagt
+            print("Cancelled.")                                                                                         # Wenn nicht --> abgesagt
 
 @app.command()
 def copy(x):                                                                                                            # copy + TITEL
