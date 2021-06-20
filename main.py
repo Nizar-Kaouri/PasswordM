@@ -50,7 +50,7 @@ def generator(password_length):
     password = "".join(temp)
     return password
 
-def copieren(x):
+def kopieren(x):
     shift = 5
     file = open("passwords.txt", 'r')
     zeilen = file.readlines()
@@ -117,15 +117,15 @@ def copy(x):
     if timedelta > datetime.timedelta(minutes=1):
         master_password_input = stdiomask.getpass()
         if master_password == master_password_input:
-            timefile = open("timestamp1.txt", 'w')
+            timefile = open("timestamp.txt", 'w')
             timefile.write(str(datetime.datetime.now()))
-            copieren(x)
+            kopieren(x)
         else:
             print("Access denied.")
     else:
         timefile = open("timestamp1.txt", 'w')
         timefile.write(str(datetime.datetime.now()))
-        copieren(x)
+        kopieren(x)
 
 @app.command()
 def clear():
