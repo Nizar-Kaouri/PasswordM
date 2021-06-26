@@ -88,7 +88,7 @@ def copy(x):                                                                    
         else:
             print("Access denied. Wrong Master Password.")
     else:
-        timefile = open("timestamp1.txt", 'w')                                                                          # Wenn die Differenz kleiner als die erlaubte Periode ist
+        timefile = open("timestamp.txt", 'w')                                                                          # Wenn die Differenz kleiner als die erlaubte Periode ist
         timefile.write(str(datetime.datetime.now()))                                                                    # Neues NOW-Timestamp ertstellen
         kopieren(x)                                                                                                     # Die Kopieren-Funktion laufen lassen
 
