@@ -70,6 +70,29 @@ def kopieren(x):                                                                
     file.close()
 
 @app.command()
+def copy(x):                                                                                                            # copy + TITEL
+    if not os.path.isfile("timestamp.txt"):                                                                             # Es wird geprüft, ob ein file mit Timestamps schon existiert
+        timefile = open("timestamp.txt", 'w')                                                                           # Wenn keines existiert, wird eins mit einem Default Timestamp ertstellt
+        timefile.write("2021-06-11 18:42:16.058009")                                                                    # Sonst wird diese If-Anweisung übersprungen
+        timefile.close()
+    timefile = open("timestamp.txt", 'r')
+    timestampstr = timefile.readline()
+    timestamp = datetime.datetime.strptime(timestampstr,"%Y-%m-%d %H:%M:%S.%f")                                         # Anfangs-Timestamp erstellt und gespeichert
+    timedelta = datetime.datetime.now() - timestamp                                                                     # Differenz zwischen Anfangs-Timestamp und NOW-Timestamp
+    if timedelta > datetime.timedelta(minutes=5):                                                                       # Wenn die Differenz größer als die erlaubte Periode ist,
+        master_password_input = stdiomask.getpass("--Master Password: ")                                                # wird es nach einem Master-Password gefragt
+        if master_password == master_password_input:
+            timefile = open("timestamp.txt", 'w')
+            timefile.write(str(datetime.datetime.now()))                                                                # Neues NOW-Timestamp ertstellen
+            kopieren(x)                                                                                                 # Die Kopieren-Funktion laufen lassen
+        else:
+            print("Access denied. Wrong Master Password.")
+    else:
+        timefile = open("timestamp1.txt", 'w')                                                                          # Wenn die Differenz kleiner als die erlaubte Periode ist
+        timefile.write(str(datetime.datetime.now()))                                                                    # Neues NOW-Timestamp ertstellen
+        kopieren(x)                                                                                                     # Die Kopieren-Funktion laufen lassen
+
+@app.command()
 def add(titel: str, name: str, password_length: int):                                                                   # add + Titel + Benutzername + Länge des Passwortes
     if not os.path.isfile("timestamp.txt"):
         timefile = open("timestamp.txt", 'w')
@@ -79,7 +102,7 @@ def add(titel: str, name: str, password_length: int):                           
     timestampstr = timefile.readline()
     timestamp = datetime.datetime.strptime(timestampstr, "%Y-%m-%d %H:%M:%S.%f")
     timedelta = datetime.datetime.now() - timestamp
-    if timedelta > datetime.timedelta(minutes=1):
+    if timedelta > datetime.timedelta(minutes=5):
         master_password_input = stdiomask.getpass("--Master Password: ")                                                # Der Benutzer wird nach einem Master-Password gefragt
         if master_password_input == master_password:                                                                    # Bei richtiger Eingabe werden alle Passwörter
             timefile = open("timestamp.txt", 'w')                                                                       # auf dem Bildschirm angezeigt
@@ -159,7 +182,7 @@ def delete(x):                                                                  
     timestampstr = timefile.readline()
     timestamp = datetime.datetime.strptime(timestampstr, "%Y-%m-%d %H:%M:%S.%f")
     timedelta = datetime.datetime.now() - timestamp
-    if timedelta > datetime.timedelta(minutes=1):
+    if timedelta > datetime.timedelta(minutes=5):
         master_password_input = stdiomask.getpass("--Master Password: ")                                                # Der Benutzer wird nach einem Master-Password gefragt
         if master_password_input == master_password:
             timefile = open("timestamp.txt", 'w')
@@ -208,28 +231,6 @@ def delete(x):                                                                  
             else:
                 print("Cancelled.")
 
-@app.command()
-def copy(x):                                                                                                            # copy + TITEL
-    if not os.path.isfile("timestamp.txt"):                                                                             # Es wird geprüft, ob ein file mit Timestamps schon existiert
-        timefile = open("timestamp.txt", 'w')                                                                           # Wenn keines existiert, wird eins mit einem Default Timestamp ertstellt
-        timefile.write("2021-06-11 18:42:16.058009")                                                                    # Sonst wird diese If-Anweisung übersprungen
-        timefile.close()
-    timefile = open("timestamp.txt", 'r')
-    timestampstr = timefile.readline()
-    timestamp = datetime.datetime.strptime(timestampstr,"%Y-%m-%d %H:%M:%S.%f")                                         # Anfangs-Timestamp erstellt und gespeichert
-    timedelta = datetime.datetime.now() - timestamp                                                                     # Differenz zwischen Anfangs-Timestamp und NOW-Timestamp
-    if timedelta > datetime.timedelta(minutes=1):                                                                       # Wenn die Differenz größer als die erlaubte Periode ist,
-        master_password_input = stdiomask.getpass("--Master Password: ")                                                # wird es nach einem Master-Password gefragt
-        if master_password == master_password_input:
-            timefile = open("timestamp.txt", 'w')
-            timefile.write(str(datetime.datetime.now()))                                                                # Neues NOW-Timestamp ertstellen
-            kopieren(x)                                                                                                 # Die Kopieren-Funktion laufen lassen
-        else:
-            print("Access denied. Wrong Master Password.")
-    else:
-        timefile = open("timestamp1.txt", 'w')                                                                          # Wenn die Differenz kleiner als die erlaubte Periode ist
-        timefile.write(str(datetime.datetime.now()))                                                                    # Neues NOW-Timestamp ertstellen
-        kopieren(x)                                                                                                     # Die Kopieren-Funktion laufen lassen
 
 @app.command()
 def clear():                                                                                                            # clear
@@ -256,7 +257,7 @@ def change(x):                                                                  
     timestampstr = timefile.readline()
     timestamp = datetime.datetime.strptime(timestampstr, "%Y-%m-%d %H:%M:%S.%f")
     timedelta = datetime.datetime.now() - timestamp
-    if timedelta > datetime.timedelta(minutes=1):
+    if timedelta > datetime.timedelta(minutes=5):
         master_password_input = stdiomask.getpass("--Master Password: ")
         if master_password == master_password_input:                                                                    # Der Benutzer wird nach einem Master-Password gefragt
             timefile = open("timestamp.txt", 'w')
